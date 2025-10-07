@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
+    "header": "eyJmaWQiOjg2NDc5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweDYwNzE4NGVkMTA3NDA5QjU5MTg0QTVEQUYzNDJmMDAzNDNCNWNjMDQifQ",
+    "payload": "eyJkb21haW4iOiJjb3VudGVyLWJhc2UudmVyY2VsLmFwcCJ9",
+    "signature": "IKk+9jBUJl429wV7npYLWz6piIUCnGepBQzcHcY3Az9epE3dIW60moh1j72ydc+qa7MEU3nOKsYrmyFD0WWHiBs="
   },
   "baseBuilder": {
     "allowedAddresses": ["0xc0F52851fCAac0cac016432E5e11954632cd2fcB"]
@@ -49,4 +49,4 @@
     "ogImageUrl": "https://counter-base.vercel.app/og-image.png",
     "noindex": false
   }
-} 
+}
