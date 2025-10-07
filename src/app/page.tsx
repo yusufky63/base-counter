@@ -44,7 +44,7 @@ interface LeaderboardUIItem {
 }
 
 export default function BaseCounterApp() {
-  const { isSDKLoaded, isInMiniApp, callReady } = useFrame();
+  const { isSDKLoaded, callReady } = useFrame();
   const [isAppReady, setIsAppReady] = useState(false);
 
   // Mobile için agresif ready() çağrısı - SDK yüklenir yüklenmez
@@ -107,31 +107,6 @@ export default function BaseCounterApp() {
           <div className="flex justify-center space-x-4 mt-8">
             <div className="h-10 w-24 bg-gray-200 rounded-full"></div>
             <div className="h-10 w-20 bg-gray-200 rounded-full"></div>
-          </div>
-        </div>
-        <div className="text-center mt-4 text-gray-600 text-sm">
-          {isInMiniApp ? "Initializing Mini App..." : "Loading Base Counter..."}
-          <div className="mt-2 text-xs opacity-70 space-y-1">
-            <div>SDK Loaded: {isSDKLoaded ? "✅" : "⏳"}</div>
-            <div>In Mini App: {isInMiniApp ? "✅" : "❌"}</div>
-            <div>
-              Platform:{" "}
-              {typeof navigator !== "undefined"
-                ? /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-                    navigator.userAgent
-                  )
-                  ? "📱 Mobile"
-                  : "💻 Desktop"
-                : "🔍 Unknown"}
-            </div>
-            <div>
-              Context:{" "}
-              {typeof window !== "undefined"
-                ? window.parent !== window
-                  ? "🖼️ Iframe"
-                  : "🌐 Direct"
-                : "🔍 SSR"}
-            </div>
           </div>
         </div>
       </div>
