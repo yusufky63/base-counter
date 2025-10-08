@@ -22,7 +22,7 @@ export default function WalletButton() {
   const [copied, setCopied] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Wallet connection - dokümana göre
+  // Wallet connection - geliştirilmiş connector seçimi
   const handleConnect = async () => {
     if (isConnecting) return;
 
@@ -30,24 +30,52 @@ export default function WalletButton() {
       setIsConnecting(true);
       await haptics.selection(); // Haptic feedback
       
-      // Connector seçimi - dokümana göre
+      // Connector seçimi - Farcaster SDK dokümantasyonuna göre
+      let selectedConnector = null;
+      
+      console.log("🔍 WalletButton - Environment check - isInMiniApp:", isInMiniApp);
+      console.log("Available connectors:", connectors.map(c => ({ id: c.id, name: c.name })));
+      
       if (isInMiniApp) {
-        // Mini App ortamında - şimdilik injected kullan
-        const injectedConnector = connectors.find(c => c.id === 'injected');
-        if (injectedConnector) {
-          await connect({ connector: injectedConnector });
-        } else {
-          await connect({ connector: connectors[0] });
+        // Mini App ortamında - Farcaster connector öncelikli
+        console.log("📱 Mini App environment - using Farcaster connector");
+        selectedConnector = connectors.find(c => 
+          c.id === 'farcaster' || 
+          c.id === 'farcasterMiniApp' ||
+          c.name === 'Farcaster'
+        );
+        
+        if (!selectedConnector) {
+          console.log("⚠️ Farcaster connector not found, falling back to injected");
+          selectedConnector = connectors.find(c => c.id === 'injected');
         }
       } else {
-        // Browser ortamında injected connector kullan
-        const injectedConnector = connectors.find(c => c.id === 'injected');
-        if (injectedConnector) {
-          await connect({ connector: injectedConnector });
-        } else {
-          await connect({ connector: connectors[0] });
+        // Browser ortamında - injected connector öncelikli
+        console.log("🌐 Browser environment - using injected connector");
+        selectedConnector = connectors.find(c => c.id === 'injected');
+        
+        if (!selectedConnector) {
+          console.log("⚠️ Injected connector not found, falling back to MetaMask");
+          selectedConnector = connectors.find(c => 
+            c.id === 'metaMask' || 
+            c.id === 'metaMaskSDK' ||
+            c.name === 'MetaMask'
+          );
         }
       }
+      
+      // Fallback - ilk connector
+      if (!selectedConnector) {
+        console.log("⚠️ No preferred connector found, using first available");
+        selectedConnector = connectors[0];
+      }
+      
+      if (!selectedConnector) {
+        throw new Error("No valid connector available");
+      }
+      
+      console.log("Connecting with connector:", selectedConnector.id);
+      await connect({ connector: selectedConnector });
       
       await haptics.notification('success');
     } catch (error) {

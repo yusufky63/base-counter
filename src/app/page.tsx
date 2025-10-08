@@ -11,6 +11,7 @@ import {
 } from "wagmi";
 import { parseEther } from "viem/utils";
 import { sdk } from "@farcaster/miniapp-sdk";
+import Image from "next/image";
 
 // Components - dokümana göre
 import { useFrame } from "./providers/FrameProvider";
@@ -121,7 +122,7 @@ export default function BaseCounterApp() {
 function CounterApp() {
   const { theme } = React.useContext(ThemeContext);
   const { isInMiniApp, context, haptics } = useFrame();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, status } = useAccount();
   const { connect, connectors } = useConnect();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
@@ -147,7 +148,27 @@ function CounterApp() {
   // State
   const [counter, setCounter] = useState("0");
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  const [isMoreAppsOpen, setIsMoreAppsOpen] = useState(false);
   const [isTransactionPending, setIsTransactionPending] = useState(false);
+  const [lastTransactionError, setLastTransactionError] = useState<
+    string | null
+  >(null);
+
+  // Apps array - yeni uygulama eklemek için sadece buraya obje ekle
+  const apps = [
+    {
+      id: "8bitcoiner",
+      name: "8BitCoiner",
+      icon: "/assets/8bitcoiner-icon.png",
+      url: "https://farcaster.xyz/miniapps/VJFTWn45l8cA/8bitcoiner",
+    },
+    {
+      id: "frevoke",
+      name: "fRevoke",
+      icon: "/assets/frevoke-icon.png",
+      url: "https://farcaster.xyz/miniapps/aXupmg6n1SY4/frevoke",
+    },
+  ];
   const [leaderboard, setLeaderboard] = useState<LeaderboardUIItem[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
@@ -182,15 +203,42 @@ function CounterApp() {
   // Contract address
   const contractAddress = React.useMemo(() => {
     try {
-      return getContractAddress("Counter", BASE_CHAIN_ID);
-    } catch {
+      const address = getContractAddress("Counter", BASE_CHAIN_ID);
+      console.log("📋 Contract address loaded:", address);
+      return address;
+    } catch (error) {
+      console.error("❌ Contract address error:", error);
       toast.error("Contract address not found");
       return null;
     }
   }, []);
 
-  // Wallet connection - dokümana göre - SADECE BASE AĞI
-  const handleWalletConnect = async () => {
+  // Network switch - SADECE BASE'A İZİN VER
+  const handleNetworkSwitch = useCallback(async () => {
+    try {
+      toast.loading("Switching to Base...", { id: "network-switch" });
+      await switchChain({ chainId: BASE_CHAIN_ID });
+      toast.dismiss("network-switch");
+      toast.success("Switched to Base!");
+      try {
+        await haptics.notification("success");
+      } catch (error) {
+        console.log("Haptic notification failed:", error);
+      }
+    } catch (error) {
+      toast.dismiss("network-switch");
+      console.error("Network switch failed:", error);
+      toast.error("Please manually switch to Base");
+      try {
+        await haptics.notification("error");
+      } catch (hapticError) {
+        console.log("Haptic error failed:", hapticError);
+      }
+    }
+  }, [switchChain, haptics]);
+
+  // Wallet connection - Farcaster SDK dokümantasyonuna göre
+  const handleWalletConnect = useCallback(async () => {
     try {
       // Haptic feedback
       try {
@@ -216,48 +264,61 @@ function CounterApp() {
         }
       }
 
-      // Farcaster Mini App connector'ını bul
-      const farcasterConnector = connectors.find(
-        (connector) =>
-          connector.name === "farcasterMiniApp" ||
-          connector.id === "farcaster" ||
-          connector.name?.toLowerCase().includes("farcaster")
-      );
+      // Connector seçimi - Farcaster SDK dokümantasyonuna göre
+      let selectedConnector = null;
 
       console.log(
+        "🔍 WalletConnect - Environment check - isInMiniApp:",
+        isInMiniApp
+      );
+      console.log(
         "Available connectors:",
-        connectors.map((c) => ({ name: c.name, id: c.id }))
+        connectors.map((c) => ({ id: c.id, name: c.name }))
       );
 
-      if (farcasterConnector) {
-        console.log("Using Farcaster connector:", farcasterConnector.name);
+      if (isInMiniApp) {
+        // Mini App ortamında - Farcaster connector öncelikli
+        console.log("📱 Mini App environment - using Farcaster connector");
+        selectedConnector = connectors.find(
+          (c) =>
+            c.id === "farcaster" ||
+            c.id === "farcasterMiniApp" ||
+            c.name === "Farcaster" ||
+            c.name?.toLowerCase().includes("farcaster")
+        );
 
-        // Connector'ın getChainId metodunu kontrol et
-        if (typeof farcasterConnector.getChainId !== "function") {
-          console.warn(
-            "Farcaster connector not fully initialized, using fallback"
+        if (!selectedConnector) {
+          console.log(
+            "⚠️ Farcaster connector not found, falling back to injected"
           );
-          await connect({ connector: connectors[0] });
-        } else {
-          await connect({ connector: farcasterConnector });
+          selectedConnector = connectors.find((c) => c.id === "injected");
         }
       } else {
-        console.log("Farcaster connector not found, using first available");
-        // İlk kullanılabilir connector'ı kontrol et
-        const firstConnector = connectors[0];
-        if (firstConnector && typeof firstConnector.getChainId === "function") {
-          await connect({ connector: firstConnector });
-        } else {
-          throw new Error("No valid connectors available");
+        // Browser ortamında - injected connector öncelikli
+        console.log("🌐 Browser environment - using injected connector");
+        selectedConnector = connectors.find((c) => c.id === "injected");
+
+        if (!selectedConnector) {
+          console.log(
+            "⚠️ Injected connector not found, falling back to MetaMask"
+          );
+          selectedConnector = connectors.find(
+            (c) =>
+              c.id === "metaMask" ||
+              c.id === "metaMaskSDK" ||
+              c.name === "MetaMask"
+          );
         }
       }
 
-      try {
-        await haptics.notification("success");
-      } catch (error) {
-        console.log("Haptic notification failed:", error);
+      // Fallback
+      if (!selectedConnector) {
+        console.log("⚠️ No preferred connector found, using first available");
+        selectedConnector = connectors[0];
       }
-      toast.success("Wallet connected!");
+
+      console.log("🔌 Connecting with connector:", selectedConnector.id);
+      await connect({ connector: selectedConnector });
 
       // Bağlandıktan sonra hemen Base ağına switch et
       setTimeout(() => {
@@ -274,35 +335,34 @@ function CounterApp() {
       }
       toast.error("Failed to connect wallet");
     }
-  };
+  }, [
+    isInMiniApp,
+    connectors,
+    connect,
+    haptics,
+    chainId,
+    isConnected,
+    handleNetworkSwitch,
+  ]);
 
-  // Network switch - SADECE BASE'A İZİN VER
-  const handleNetworkSwitch = async () => {
-    try {
-      toast.loading("Switching to Base...", { id: "network-switch" });
-      await switchChain({ chainId: BASE_CHAIN_ID });
-      toast.dismiss("network-switch");
-      toast.success("Switched to Base!");
-      try {
-        await haptics.notification("success");
-      } catch (error) {
-        console.log("Haptic notification failed:", error);
-      }
-    } catch (error) {
-      toast.dismiss("network-switch");
-      console.error("Network switch failed:", error);
-      toast.error("Please manually switch to Base");
-      try {
-        await haptics.notification("error");
-      } catch (hapticError) {
-        console.log("Haptic error failed:", hapticError);
-      }
+  // Counter artırma - geliştirilmiş error handling ve retry
+  const handleIncrement = async (retryCount = 0) => {
+    console.log("🚀 handleIncrement called with retryCount:", retryCount);
+    console.log("Contract address:", contractAddress);
+    console.log("Is transaction pending:", isTransactionPending);
+
+    if (!contractAddress || isTransactionPending) {
+      console.log(
+        "❌ Early return - contractAddress:",
+        !!contractAddress,
+        "isTransactionPending:",
+        isTransactionPending
+      );
+      return;
     }
-  };
 
-  // Counter artırma - dokümana göre
-  const handleIncrement = async () => {
-    if (!contractAddress || isTransactionPending) return;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000; // 1 saniye
 
     try {
       // Haptic feedback
@@ -313,20 +373,43 @@ function CounterApp() {
       }
 
       // Wallet bağlantısını kontrol et
+      console.log("🔍 Wallet connection check:");
+      console.log("- isConnected:", isConnected);
+      console.log("- address:", address);
+      console.log("- chainId:", chainId);
+
       if (!isConnected) {
-        await handleWalletConnect();
+        console.log("🔌 Wallet not connected, attempting to connect...");
+        toast.loading("Connecting wallet...", { id: "wallet-connect" });
+        try {
+          await handleWalletConnect();
+          toast.dismiss("wallet-connect");
+        } catch (connectError) {
+          console.error("Wallet connection failed:", connectError);
+          toast.dismiss("wallet-connect");
+          toast.error("Failed to connect wallet");
+        }
         return;
       }
 
       // Chain kontrolü - SADECE BASE KABUL ET
       if (chainId !== BASE_CHAIN_ID) {
         await handleNetworkSwitch();
-        return; // Network switch'ten sonra tekrar denesin
+        return;
       }
 
       // writeContract hook'unun hazır olup olmadığını kontrol et
       if (!writeContract) {
         console.error("writeContract hook not ready");
+        if (retryCount < MAX_RETRIES) {
+          console.log(
+            `writeContract not ready, retrying in ${RETRY_DELAY}ms... (attempt ${
+              retryCount + 1
+            }/${MAX_RETRIES})`
+          );
+          setTimeout(() => handleIncrement(retryCount + 1), RETRY_DELAY);
+          return;
+        }
         toast.error("Wallet connection not ready, please try again");
         return;
       }
@@ -334,6 +417,15 @@ function CounterApp() {
       // Connector validation
       if (!connectorsReady) {
         console.error("Connectors not fully initialized");
+        if (retryCount < MAX_RETRIES) {
+          console.log(
+            `Connectors not ready, retrying in ${RETRY_DELAY}ms... (attempt ${
+              retryCount + 1
+            }/${MAX_RETRIES})`
+          );
+          setTimeout(() => handleIncrement(retryCount + 1), RETRY_DELAY);
+          return;
+        }
         toast.error("Wallet is initializing, please wait and try again");
         return;
       }
@@ -344,22 +436,86 @@ function CounterApp() {
         return;
       }
 
+      // Connector kontrolü - Farcaster SDK dokümantasyonuna göre
+      let currentConnector = null;
+
+      console.log("🔍 Environment check - isInMiniApp:", isInMiniApp);
+      console.log(
+        "Available connectors:",
+        connectors.map((c) => ({ id: c.id, name: c.name }))
+      );
+
+      if (isInMiniApp) {
+        // Mini App ortamında - Farcaster connector öncelikli
+        console.log(
+          "📱 Mini App environment detected - using Farcaster connector"
+        );
+        currentConnector = connectors.find(
+          (c) =>
+            c.id === "farcaster" ||
+            c.id === "farcasterMiniApp" ||
+            c.name === "Farcaster"
+        );
+
+        if (!currentConnector) {
+          console.log(
+            "⚠️ Farcaster connector not found, falling back to injected"
+          );
+          currentConnector = connectors.find((c) => c.id === "injected");
+        }
+      } else {
+        // Browser ortamında - injected connector öncelikli
+        console.log(
+          "🌐 Browser environment detected - using injected connector"
+        );
+        currentConnector = connectors.find((c) => c.id === "injected");
+
+        if (!currentConnector) {
+          console.log(
+            "⚠️ Injected connector not found, falling back to MetaMask"
+          );
+          currentConnector = connectors.find(
+            (c) =>
+              c.id === "metaMask" ||
+              c.id === "metaMaskSDK" ||
+              c.name === "MetaMask"
+          );
+        }
+      }
+
+      // Fallback - ilk geçerli connector
+      if (!currentConnector) {
+        console.log("⚠️ No preferred connector found, using first available");
+        currentConnector = connectors[0];
+      }
+
+      if (!currentConnector) {
+        console.error("No valid connector found");
+        toast.error("No wallet connector available");
+        return;
+      }
+
       setIsTransactionPending(true);
       toast.loading("Sending transaction...", { id: "tx-loading" });
 
       // Yeni transaction başladı - previous hash'i temizle
       processedHashRef.current = null;
 
-      // Çok kısa timeout - 5 saniye sonra loading'i kapat (cancel durumu için)
+      // Daha uzun timeout - 10 saniye
       transactionTimeoutRef.current = setTimeout(() => {
-        console.warn("Transaction likely cancelled - auto clearing");
+        console.warn("Transaction timeout - auto clearing");
         toast.dismiss("tx-loading");
         setIsTransactionPending(false);
-      }, 5000); // 5 saniye çok agresif
+      }, 10000);
 
       try {
         // Transaction gönder - extra validation
         console.log("📤 Sending transaction to contract:", contractAddress);
+        console.log("Using connector:", currentConnector.id);
+        console.log("Is connected:", isConnected);
+        console.log("Address:", address);
+        console.log("Chain ID:", chainId);
+        console.log("WriteContract function:", typeof writeContract);
 
         const txParams = {
           address: contractAddress,
@@ -369,6 +525,12 @@ function CounterApp() {
         };
 
         console.log("Transaction params:", txParams);
+
+        // writeContract'ı çağırmadan önce son kontrol
+        if (typeof writeContract !== "function") {
+          throw new Error("writeContract is not a function");
+        }
+
         writeContract(txParams);
       } catch (writeError: unknown) {
         // writeContract'tan gelen immediate hata
@@ -391,6 +553,12 @@ function CounterApp() {
           errorMessage.includes("cancelled") ||
           errorCode === 4001;
 
+        // Connector hatası kontrolü
+        const isConnectorError =
+          errorMessage.includes("getchainid") ||
+          errorMessage.includes("connector") ||
+          errorMessage.includes("not a function");
+
         toast.dismiss("tx-loading");
 
         if (isCancelledImmediate) {
@@ -400,8 +568,18 @@ function CounterApp() {
           } catch (error) {
             console.log("Haptic warning failed:", error);
           }
+        } else if (isConnectorError && retryCount < MAX_RETRIES) {
+          console.log(
+            `Connector error detected, retrying in ${RETRY_DELAY}ms... (attempt ${
+              retryCount + 1
+            }/${MAX_RETRIES})`
+          );
+          setTimeout(() => handleIncrement(retryCount + 1), RETRY_DELAY);
+          return;
         } else {
-          toast.error("Failed to send transaction", { duration: 3000 });
+          const errorMsg = "Failed to send transaction";
+          setLastTransactionError(errorMsg);
+          toast.error(errorMsg, { duration: 3000 });
           try {
             await haptics.notification("error");
           } catch (error) {
@@ -415,9 +593,30 @@ function CounterApp() {
         clearTimeout(transactionTimeoutRef.current);
         transactionTimeoutRef.current = null;
       }
+
       console.error("Setup error:", error);
       toast.dismiss("tx-loading");
-      toast.error("Transaction setup failed");
+
+      // Connector hatası kontrolü
+      const errorMessage = (error as Error)?.message?.toLowerCase() || "";
+      const isConnectorError =
+        errorMessage.includes("getchainid") ||
+        errorMessage.includes("connector") ||
+        errorMessage.includes("not a function");
+
+      if (isConnectorError && retryCount < MAX_RETRIES) {
+        console.log(
+          `Connector error detected, retrying in ${RETRY_DELAY}ms... (attempt ${
+            retryCount + 1
+          }/${MAX_RETRIES})`
+        );
+        setTimeout(() => handleIncrement(retryCount + 1), RETRY_DELAY);
+        return;
+      }
+
+      const errorMsg = "Transaction setup failed";
+      setLastTransactionError(errorMsg);
+      toast.error(errorMsg);
       try {
         await haptics.notification("error");
       } catch (hapticError) {
@@ -505,6 +704,29 @@ function CounterApp() {
     }
   }, [hookLeaderboard, address]);
 
+  // Wallet bağlantı durumu değişikliklerini takip et
+  const [previousAddress, setPreviousAddress] = useState<string | undefined>(undefined);
+  
+  useEffect(() => {
+    if (status === "connected" && isConnected && address) {
+      // Sadece gerçekten yeni bir bağlantı olduğunda toast göster
+      if (previousAddress !== address) {
+        console.log("✅ Wallet connected successfully:", address);
+        toast.success("Wallet connected!");
+        try {
+          haptics.notification("success");
+        } catch (error) {
+          console.log("Haptic notification failed:", error);
+        }
+        setPreviousAddress(address);
+      }
+    } else if (status === "disconnected") {
+      console.log("❌ Wallet disconnected");
+      setPreviousAddress(undefined);
+      // Disconnect toast'ı gösterme, sadece log
+    }
+  }, [status, isConnected, address, haptics, previousAddress]);
+
   // Transaction sonuçlarını handle et
   useEffect(() => {
     if (hash && processedHashRef.current !== hash) {
@@ -520,6 +742,7 @@ function CounterApp() {
       console.log("✅ Transaction sent:", hash);
       toast.dismiss("tx-loading");
       toast.success("Transaction sent!", { duration: 2000 });
+      setLastTransactionError(null); // Clear any previous errors
 
       // Haptic feedback'i güvenli şekilde çağır
       (async () => {
@@ -645,6 +868,25 @@ function CounterApp() {
         if (readyConnectors.length > 0) {
           console.log("✅ Connectors ready:", readyConnectors.length);
           setConnectorsReady(true);
+
+          // Mini App'te otomatik bağlantı - Farcaster SDK dokümantasyonuna göre
+          if (isInMiniApp && !isConnected) {
+            console.log(
+              "📱 Mini App detected - attempting auto-connect with Farcaster"
+            );
+            try {
+              // Kısa bir gecikme ile otomatik bağlantı
+              setTimeout(async () => {
+                try {
+                  await handleWalletConnect();
+                } catch (error) {
+                  console.log("Auto-connect failed:", error);
+                }
+              }, 1500);
+            } catch (error) {
+              console.log("Auto-connect setup failed:", error);
+            }
+          }
         } else {
           console.log("⚠️ Connectors not fully initialized, retrying...");
           // 2 saniye sonra tekrar kontrol et
@@ -656,7 +898,13 @@ function CounterApp() {
     if (!connectorsReady) {
       checkConnectors();
     }
-  }, [connectors, connectorsReady]);
+  }, [
+    connectors,
+    connectorsReady,
+    isInMiniApp,
+    isConnected,
+    handleWalletConnect,
+  ]);
 
   useEffect(() => {
     if (!isInitialDataLoaded) {
@@ -709,7 +957,18 @@ function CounterApp() {
               ? "pointer-events-none opacity-70 scale-95"
               : "hover:scale-105 active:scale-95"
           }`}
-          onClick={connectorsReady ? handleIncrement : undefined}
+          onClick={
+            connectorsReady
+              ? () => {
+                  console.log("🖱️ Counter button clicked!");
+                  console.log("Connectors ready:", connectorsReady);
+                  console.log("Is connected:", isConnected);
+                  console.log("Address:", address);
+                  console.log("Chain ID:", chainId);
+                  handleIncrement();
+                }
+              : undefined
+          }
         >
           {/* Chain warning */}
           {isConnected && chainId !== BASE_CHAIN_ID && (
@@ -814,55 +1073,62 @@ function CounterApp() {
               "Connect wallet to increment"
             )}
           </div>
+
+          {/* Retry button for failed transactions */}
+          {lastTransactionError && !isTransactionPending && connectorsReady && (
+            <div className="mt-4">
+              <button
+                onClick={() => {
+                  setLastTransactionError(null);
+                  handleIncrement();
+                }}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors duration-200 flex items-center gap-2"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Try Again
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="w-full p-6 space-y-4 bg-white border-t border-gray-100">
+      <div className="w-full p-3 space-y-2 bg-white border-t border-gray-100">
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-center gap-8 text-sm">
+        <div className="flex items-center justify-center gap-2 text-sm">
           <button
             onClick={() => {
               setIsLeaderboardOpen(true);
               fetchLeaderboard();
             }}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium"
+            className="px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium"
           >
-            <svg
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
             Leaderboard
           </button>
           <button
             onClick={handleComposeCast}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium"
+            className="px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium"
           >
-            <svg
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
             Share Cast
+          </button>
+          <button
+            onClick={() => setIsMoreAppsOpen(true)}
+            className="px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium"
+          >
+          More Apps
           </button>
         </div>
       </div>
@@ -880,6 +1146,86 @@ function CounterApp() {
           rankDetails={rankDetails}
           contributionTarget={contributionTarget}
         />
+      )}
+
+      {/* More Apps Modal */}
+      {isMoreAppsOpen && (
+        <div className="fixed inset-0  bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-bold text-gray-900">More Apps</h2>
+                <button
+                  onClick={() => setIsMoreAppsOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {apps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden">
+                        <Image
+                          src={app.icon}
+                          alt={app.name}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">
+                          {app.name}
+                        </h3>
+                      </div>
+                      <a
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
+                        </svg>
+                        Open
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

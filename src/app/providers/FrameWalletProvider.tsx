@@ -11,17 +11,44 @@ const BASE_RPC = "https://mainnet.base.org";
 
 // Lazy connector initialization - timing sorunlarını önlemek için
 const getConnectors = () => {
+  const connectors = [];
+  
   try {
-    return [
-      farcasterMiniApp(), // Farcaster Mini App connector
-      injected(),
-      metaMask(),
-    ];
+    // Farcaster Mini App connector
+    const farcasterConnector = farcasterMiniApp();
+    connectors.push(farcasterConnector);
   } catch (error) {
-    console.warn("Some connectors failed to initialize:", error);
-    // Fallback connectors
-    return [injected()];
+    console.warn("Farcaster connector failed to initialize:", error);
   }
+  
+  try {
+    // Injected connector
+    const injectedConnector = injected();
+    connectors.push(injectedConnector);
+  } catch (error) {
+    console.warn("Injected connector failed to initialize:", error);
+  }
+  
+  try {
+    // MetaMask connector
+    const metaMaskConnector = metaMask();
+    connectors.push(metaMaskConnector);
+  } catch (error) {
+    console.warn("MetaMask connector failed to initialize:", error);
+  }
+  
+  // En az bir connector olmalı
+  if (connectors.length === 0) {
+    console.error("No valid connectors available, using fallback");
+    try {
+      connectors.push(injected());
+    } catch (error) {
+      console.error("Fallback connector also failed:", error);
+    }
+  }
+  
+  console.log(`Initialized ${connectors.length} connectors`);
+  return connectors;
 };
 
 // Wagmi configuration following Farcaster Mini App docs

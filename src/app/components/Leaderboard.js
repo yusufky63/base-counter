@@ -102,7 +102,7 @@ const Leaderboard = ({
   const formatAddress = (address) => {
     if (!address) return "Unknown";
     if (address === userAddress) return "You";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return `${address.slice(0, 3)}...${address.slice(-4)}`;
   };
 
   const getPositionEmoji = (position) => {
@@ -113,8 +113,8 @@ const Leaderboard = ({
   };
 
   return (
-    <div className="p-3 rounded-2xl   bg-white ">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-2 rounded-2xl   bg-white ">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-bold text-blue-600">Leaderboard</h2>
         <div className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-600">
           Total: {processedLeaderboard.length} User
@@ -122,7 +122,7 @@ const Leaderboard = ({
         </div>
       </div>
 
-      <div className="space-y-3 pr-1">
+      <div className="space-y-1">
         {currentPageData.map((user, index) => {
           const position = page * itemsPerPage + index + 1;
           const isCurrentUser = user.userAddress === userAddress;
@@ -130,7 +130,7 @@ const Leaderboard = ({
           return (
             <div
               key={user.userAddress}
-              className={`relative group flex items-center p-3 rounded-xl border transition-all ${
+              className={`relative group flex items-center p-2 rounded-xl border transition-all ${
                 isCurrentUser
                   ? "bg-blue-50 border-blue-200 hover:bg-blue-100"
                   : "bg-gray-50 border-gray-200 hover:bg-gray-100"
@@ -148,7 +148,7 @@ const Leaderboard = ({
 
               <div className="ml-3 flex-grow min-w-0">
                 <div
-                  className={`font-medium truncate ${
+                  className={`font-medium truncate text-xs sm:text-sm ${
                     isCurrentUser ? "text-blue-600 font-bold" : "text-gray-900"
                   }`}
                 >
