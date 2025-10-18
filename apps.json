@@ -1,0 +1,45 @@
+[
+  {
+    "id": "base-2048",
+    "name": "Base 2048",
+    "description": "Play the classic 2048 game on Base.",
+    "icon": "/icons/base2048-icon.png",
+    "url": "https://farcaster.xyz/miniapps/QHbC0qgJxMWl/base-2048"
+  },
+  {
+    "id": "game-hub",
+    "name": "DrawCoin",
+    "description": "Hand-drawn art tokens on Base",
+    "icon": "/icons/drawcoin-icon.png",
+    "url": "https://farcaster.xyz/miniapps/dc-pPO5wFd6-/drawcoin"
+  },
+
+  {
+    "id": "8bitminter",
+    "name": "8BitCoiner",
+    "description": "Retro tokens on Base",
+    "icon": "/icons/8bitcoiner-icon.png",
+    "url": "https://farcaster.xyz/miniapps/VJFTWn45l8cA/8bitcoiner"
+  },
+  {
+    "id": "farsender",
+    "name": "FarSender",
+    "description": "Send tokens to multiple addresses easily.",
+    "icon": "/icons/farsender-icon.png",
+    "url": "https://farcaster.xyz/miniapps/x39YyDYuusxa/farsender"
+  },
+  {
+    "id": "frevoke",
+    "name": "fRevoke",
+    "description": "Token Approval Revoker",
+    "icon": "/icons/frevoke-icon.png",
+    "url": "https://farcaster.xyz/miniapps/aXupmg6n1SY4/frevoke"
+  },
+  {
+    "id": "monad-counter",
+    "name": "Monad Counter",
+    "description": "On-chain counter for Monad.",
+    "icon": "/icons/monad-counter-icon.png",
+    "url": "https://farcaster.xyz/miniapps/xBGkTrC41Qaj/monad-counter"
+  }
+]

@@ -12,6 +12,7 @@ import {
 import { parseEther } from "viem/utils";
 import { sdk } from "@farcaster/miniapp-sdk";
 import Image from "next/image";
+import appsData from "../../apps.json";
 
 // Components - dokümana göre
 import { useFrame } from "./providers/FrameProvider";
@@ -154,21 +155,8 @@ function CounterApp() {
     string | null
   >(null);
 
-  // Apps array - yeni uygulama eklemek için sadece buraya obje ekle
-  const apps = [
-    {
-      id: "8bitcoiner",
-      name: "8BitCoiner",
-      icon: "/assets/8bitcoiner-icon.png",
-      url: "https://farcaster.xyz/miniapps/VJFTWn45l8cA/8bitcoiner",
-    },
-    {
-      id: "frevoke",
-      name: "fRevoke",
-      icon: "/assets/frevoke-icon.png",
-      url: "https://farcaster.xyz/miniapps/aXupmg6n1SY4/frevoke",
-    },
-  ];
+  // Apps data from JSON - otomatik olarak güncellenir
+  const apps = appsData;
   const [leaderboard, setLeaderboard] = useState<LeaderboardUIItem[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
@@ -705,8 +693,10 @@ function CounterApp() {
   }, [hookLeaderboard, address]);
 
   // Wallet bağlantı durumu değişikliklerini takip et
-  const [previousAddress, setPreviousAddress] = useState<string | undefined>(undefined);
-  
+  const [previousAddress, setPreviousAddress] = useState<string | undefined>(
+    undefined
+  );
+
   useEffect(() => {
     if (status === "connected" && isConnected && address) {
       // Sadece gerçekten yeni bir bağlantı olduğunda toast göster
@@ -1128,7 +1118,7 @@ function CounterApp() {
             onClick={() => setIsMoreAppsOpen(true)}
             className="px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 font-medium"
           >
-          More Apps
+            More Apps
           </button>
         </div>
       </div>
@@ -1150,62 +1140,75 @@ function CounterApp() {
 
       {/* More Apps Modal */}
       {isMoreAppsOpen && (
-        <div className="fixed inset-0  bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto">
             <div className="p-3">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xl font-bold text-gray-900">More Apps</h2>
-                <button
-                  onClick={() => setIsMoreAppsOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsMoreAppsOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
+                <a
+                  href="https://farcaster.xyz/codexsha"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Follow @codexsha
+                </a>
                 {apps.map((app) => (
                   <div
                     key={app.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                    className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
                           src={app.icon}
                           alt={app.name}
-                          width={48}
-                          height={48}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm mb-1">
                           {app.name}
                         </h3>
+                        <p className="text-xs text-gray-600 line-clamp-1">
+                          {app.description}
+                        </p>
                       </div>
                       <a
                         href={app.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors flex-shrink-0"
                       >
                         <svg
-                          width="12"
-                          height="12"
+                          width="10"
+                          height="10"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

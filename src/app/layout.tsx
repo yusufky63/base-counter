@@ -33,7 +33,7 @@ export default function RootLayout({
         <meta property="og:title" content="Base Counter" />
         <meta
           property="og:description"
-          content="On-chain counter mini-app for Base and Farcaster."
+          content="On-chain counter mini-app for Base."
         />
         <meta
           property="og:image"
@@ -44,12 +44,12 @@ export default function RootLayout({
         {/* Farcaster Mini App Embed Meta - Base Compatible */}
         <meta
           name="fc:miniapp"
-          content='{"version":"1","imageUrl":"https://counter-base.vercel.app/og-image.png","button":{"title":"🚀 Launch Counter","action":{"type":"launch_miniapp","name":"Base Counter","url":"https://counter-base.vercel.app","splashImageUrl":"https://counter-base.vercel.app/splash.png","splashBackgroundColor":"#1428db"}}}'
+          content='{"version":"1","imageUrl":"https://counter-base.vercel.app/og-image.png","button":{"title":"🚀 Increment Counter","action":{"type":"launch_miniapp","name":"Base Counter","url":"https://counter-base.vercel.app","splashImageUrl":"https://counter-base.vercel.app/splash.png","splashBackgroundColor":"#FFFFFF"}}}'
         />
         {/* Frame compatibility */}
         <meta
           name="fc:frame"
-          content='{"version":"1","imageUrl":"https://counter-base.vercel.app/og-image.png","button":{"title":"🚀 Launch Counter","action":{"type":"launch_frame","name":"Base Counter","url":"https://counter-base.vercel.app","splashImageUrl":"https://counter-base.vercel.app/splash.png","splashBackgroundColor":"#1428db"}}}'
+          content='{"version":"1","imageUrl":"https://counter-base.vercel.app/og-image.png","button":{"title":"🚀 Increment Counter","action":{"type":"launch_frame","name":"Base Counter","url":"https://counter-base.vercel.app","splashImageUrl":"https://counter-base.vercel.app/splash.png","splashBackgroundColor":"#FFFFFF"}}}'
         />
       </head>
       <body>
