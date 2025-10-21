@@ -509,7 +509,7 @@ function CounterApp() {
           address: contractAddress,
           abi: counterABI,
           functionName: "incrementCounter",
-          value: parseEther("0.00001"), // 0.00001 BASE fee
+          value: parseEther("0.0000001"), // 0.00001 BASE fee
         };
 
         console.log("Transaction params:", txParams);
