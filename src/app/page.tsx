@@ -9,7 +9,6 @@ import {
   useChainId,
   useSwitchChain,
 } from "wagmi";
-import { parseEther } from "viem/utils";
 import { sdk } from "@farcaster/miniapp-sdk";
 import Image from "next/image";
 import appsData from "../../apps.json";
@@ -148,6 +147,7 @@ function CounterApp() {
 
   // State
   const [counter, setCounter] = useState("0");
+  const [contractFee, setContractFee] = useState<string | null>(null);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [isMoreAppsOpen, setIsMoreAppsOpen] = useState(false);
   const [isTransactionPending, setIsTransactionPending] = useState(false);
@@ -505,11 +505,14 @@ function CounterApp() {
         console.log("Chain ID:", chainId);
         console.log("WriteContract function:", typeof writeContract);
 
+        // Use contract fee if available, otherwise fallback to manual fee
+        const feeValue = contractFee ? BigInt(contractFee) : BigInt("2000000000000"); // 0.000002 ETH in wei as fallback
+        
         const txParams = {
           address: contractAddress,
           abi: counterABI,
           functionName: "incrementCounter",
-          value: parseEther("0.0000001"), // 0.00001 BASE fee
+          value: feeValue, // Dynamic fee from contract
         };
 
         console.log("Transaction params:", txParams);
@@ -613,6 +616,41 @@ function CounterApp() {
       setIsTransactionPending(false);
     }
   };
+
+  // Contract fee'yi getir
+  const fetchContractFee = useCallback(async () => {
+    if (!contractAddress) return;
+
+    try {
+      const response = await fetch("https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "eth_call",
+          params: [
+            {
+              to: contractAddress,
+              data: "0x3ccfd60b", // fee() function signature
+            },
+            "latest",
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      if (data.result) {
+        const feeValue = parseInt(data.result, 16).toString();
+        setContractFee(feeValue);
+        console.log("📋 Contract fee fetched:", feeValue);
+      }
+    } catch (error) {
+      console.error("Failed to fetch contract fee:", error);
+      // Fallback to manual fee if contract call fails
+      setContractFee("2000000000000"); // 0.000002 ETH in wei
+    }
+  }, [contractAddress]);
 
   // Counter değerini getir
   const fetchCounter = useCallback(async () => {
@@ -816,6 +854,11 @@ function CounterApp() {
       setIsTransactionPending(false);
     }
   }, [writeError, haptics]);
+
+  // Contract fee'yi yükle
+  useEffect(() => {
+    fetchContractFee();
+  }, [contractAddress, fetchContractFee]);
 
   // Counter'ı periyodik olarak güncelle
   useEffect(() => {
