@@ -33,7 +33,7 @@ export const useCounter = ({ chainId, address, isConnected }) => {
 
   const provider = useMemo(() => {
     try {
-      return new ethers.providers.JsonRpcProvider("https://mainnet.base.org");
+      return new ethers.providers.JsonRpcProvider("https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID");
     } catch (error) {
       console.error("Failed to create RPC provider:", error);
       return null;

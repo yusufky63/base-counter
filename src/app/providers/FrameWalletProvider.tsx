@@ -7,7 +7,7 @@ import { createConfig, http, WagmiProvider } from "wagmi";
 import { base } from "wagmi/chains";
 import { injected, metaMask } from "wagmi/connectors";
 
-const BASE_RPC = "https://mainnet.base.org";
+const BASE_RPC = "https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID";
 
 // Lazy connector initialization - timing sorunlarını önlemek için
 const getConnectors = () => {

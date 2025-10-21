@@ -619,7 +619,7 @@ function CounterApp() {
     if (!contractAddress) return;
 
     try {
-      const response = await fetch("https://mainnet.base.org", {
+      const response = await fetch("https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

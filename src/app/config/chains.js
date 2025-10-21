@@ -10,7 +10,7 @@ const SupportedChains = {
       decimals: 18,
     },
     rpcUrls: [
-      "https://mainnet.base.org",
+      "https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID",
       "https://base.g.alchemy.com/v2/6hAsuhqJZ4ecT3Ld2GAy8W0RUeFPFmyl",
     ],
     blockExplorerUrls: ["https://basescan.org"],
