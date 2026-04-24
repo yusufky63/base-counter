@@ -7,7 +7,11 @@ import { createConfig, http, WagmiProvider } from "wagmi";
 import { base } from "wagmi/chains";
 import { injected, metaMask } from "wagmi/connectors";
 
+import { Attribution } from "ox/erc8021";
+
 const BASE_RPC = "https://base-mainnet.g.alchemy.com/v2/tZlJB1-FKd6v-66GsIVID";
+
+const DATA_SUFFIX = Attribution.toDataSuffix({ codes: ["bc_d014cmre"] });
 
 // Lazy connector initialization - timing sorunlarını önlemek için
 const getConnectors = () => {
@@ -65,6 +69,8 @@ export const config = createConfig({
   },
   connectors: getConnectors(),
   ssr: false, // SSR'ı devre dışı bırak
+  // @ts-expect-error - wagmi createConfig types do not include dataSuffix but viem supports it
+  dataSuffix: DATA_SUFFIX,
 });
 
 // Query client configuration
