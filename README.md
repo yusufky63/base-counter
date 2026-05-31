@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Base Counter
+
+![Category](https://img.shields.io/badge/Category-On-chain%20Counter%20%2F%20Base-1f1f1f?style=flat-square&labelColor=141414&color=2b2b2b) ![Status](https://img.shields.io/badge/Status-public-1f1f1f?style=flat-square&labelColor=141414&color=2b2b2b)
+
+On-chain counter experience for Base with wallet connection, leaderboard UI, and Farcaster sharing.
+
+## Links
+
+- Live: https://counter-base.vercel.app
+- Repository: https://github.com/yusufky63/base-counter
+- Portfolio: https://codexsha.dev
+
+## Overview
+
+Base Counter is part of the Codexsha product portfolio. The project is focused on shipping a compact, usable product surface rather than a demo-only prototype. This README is written to make the repository easier to understand, run, and evaluate.
+
+## Key Features
+
+- Base-only counter interaction
+- Wallet connection and network switching
+- Leaderboard UI
+- Farcaster sharing flow
+- Compact mini app UX
+
+## Stack
+
+- Next.js
+- Farcaster SDK
+- Wagmi
+- Viem
+- Ethers
+- React Query
+- Ox
+
+## Role / Ownership
+
+Built the counter UI, wallet flow, contract interaction path, leaderboard presentation, and Farcaster share action.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a local environment file from the project conventions and configure only the values needed for the flow you are running. Do not commit secrets.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Typical values used by this project include:
 
-## Learn More
+- Contract address and ABI configuration
+- wallet connector settings
+- Farcaster metadata
 
-To learn more about Next.js, take a look at the following resources:
+## Project Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Status: Public repository and live deployment.
+- Private or sensitive implementation details are intentionally not documented in public-facing copy.
+- The README should stay aligned with the live product and the Codexsha portfolio page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Maintainer
 
-## Deploy on Vercel
+Built by Yusuf / Codexsha.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- GitHub: https://github.com/yusufky63
+- X: https://x.com/codexsha
+- Telegram: https://t.me/codexsha
