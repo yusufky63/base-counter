@@ -1,28 +1,34 @@
 # Base Counter
 
-![Category](https://img.shields.io/badge/Category-On-chain%20Counter%20%2F%20Base-1f1f1f?style=flat-square&labelColor=141414&color=2b2b2b) ![Status](https://img.shields.io/badge/Status-public-1f1f1f?style=flat-square&labelColor=141414&color=2b2b2b)
+Base Counter is a compact on-chain counter experience for Base with wallet connection, leaderboard UI, and Farcaster sharing.
 
-On-chain counter experience for Base with wallet connection, leaderboard UI, and Farcaster sharing.
+## Snapshot
 
-## Links
+- **Category:** On-chain counter for Base
+- **Status:** Public repository
+- **Live:** https://counter-base.vercel.app
+- **Repository:** https://github.com/yusufky63/base-counter
+- **Portfolio:** https://codexsha.dev
 
-- Live: https://counter-base.vercel.app
-- Repository: https://github.com/yusufky63/base-counter
-- Portfolio: https://codexsha.dev
+## Product Scope
 
-## Overview
+Base Counter is documented here as a product repository, not just a code dump. The goal of this README is to make the product purpose, runtime surface, and development path clear for future review and maintenance.
 
-Base Counter is part of the Codexsha product portfolio. The project is focused on shipping a compact, usable product surface rather than a demo-only prototype. This README is written to make the repository easier to understand, run, and evaluate.
-
-## Key Features
+## Core Capabilities
 
 - Base-only counter interaction
 - Wallet connection and network switching
-- Leaderboard UI
+- Leaderboard presentation
 - Farcaster sharing flow
-- Compact mini app UX
+- Mini app style distribution
 
-## Stack
+## Existing README Coverage Preserved
+
+This refresh keeps the important project-specific areas from the previous documentation:
+
+- Default Next.js starter README was present and did not describe the actual product
+
+## Tech Stack
 
 - Next.js
 - Farcaster SDK
@@ -32,33 +38,39 @@ Base Counter is part of the Codexsha product portfolio. The project is focused o
 - React Query
 - Ox
 
-## Role / Ownership
+## Repository Map
 
-Built the counter UI, wallet flow, contract interaction path, leaderboard presentation, and Farcaster share action.
+| Path | Purpose |
+| --- | --- |
+| src/app/ | Routes and main app |
+| src/components/ | Wallet and counter UI |
+| src/lib/ | Contract/Farcaster helpers |
+| public/ | Mini app assets |
 
-## Getting Started
+## Local Development
 
-```bash
-npm install
-npm run dev
-npm run build
-```
+| Command | Purpose |
+| --- | --- |
+| npm run dev | Run local dev server |
+| npm run build | Build production app |
+| npm run start | Start production server |
+| npm run lint | Run lint checks |
+| npm run tunnel | Run tunnel flow when testing mini app contexts |
 
-## Environment
+## Environment Notes
 
-Create a local environment file from the project conventions and configure only the values needed for the flow you are running. Do not commit secrets.
-
-Typical values used by this project include:
+Use local environment files for secrets and deployment-specific values. Do not commit real keys.
 
 - Contract address and ABI configuration
-- wallet connector settings
-- Farcaster metadata
+- Wallet connector settings
+- Farcaster metadata values
+- Optional tunnel URL for mobile testing
 
-## Project Notes
+## Operational Notes
 
-- Status: Public repository and live deployment.
-- Private or sensitive implementation details are intentionally not documented in public-facing copy.
-- The README should stay aligned with the live product and the Codexsha portfolio page.
+- Keep this README aligned with the live product and portfolio copy.
+- Prefer small, documented changes over large undocumented rewrites.
+- This replaces the generic starter README with project-specific documentation.
 
 ## Maintainer
 
