@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Base Counter
 
-## Getting Started
+Base Counter is a small on-chain counter experience for Base with wallet connection, Farcaster Mini App support, leaderboard UI, and sharing-oriented product flow.
 
-First, run the development server:
+This README replaces the generic Next.js starter text with project-specific setup and architecture notes.
+
+## Features
+
+- Connect a wallet from web or Farcaster Mini App context.
+- Read and submit counter interactions on Base-oriented contracts.
+- Display leaderboard-style user activity.
+- Share activity through Farcaster-friendly surfaces.
+- Use `cloudflared` tunnel script for mobile/mini app testing.
+
+| Layer | Tools |
+| --- | --- |
+| App | Next.js, React, TypeScript, React Icons, Lucide React |
+| Farcaster | Farcaster Mini App SDK, Mini App Wagmi Connector |
+| Web3 | Wagmi, Viem, Ethers, Ox |
+| Data/UI | React Query, React Hot Toast, local app state |
+
+## Project Structure
+
+- `src/` - App Router pages, components, wallet hooks, and contract interaction logic.
+- `public/` - icons and app metadata.
+- `apps.json` - mini app/discovery metadata.
+- `next.config.ts` - Next.js configuration.
+
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local Next.js dev server. |
+| `npm run build` | Build for production. |
+| `npm start` | Run the production server. |
+| `npm run lint` | Run lint checks. |
+| `npm run tunnel` | Expose local development through a tunnel for Farcaster/mobile testing. |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Repository: https://github.com/yusufky63/base-counter
+- Live app: https://counter-base.vercel.app
