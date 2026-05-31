@@ -1,81 +1,47 @@
 # Base Counter
 
-Base Counter is a compact on-chain counter experience for Base with wallet connection, leaderboard UI, and Farcaster sharing.
+Base Counter is a small on-chain counter experience for Base with wallet connection, Farcaster Mini App support, leaderboard UI, and sharing-oriented product flow.
 
-## Snapshot
+This README replaces the generic Next.js starter text with project-specific setup and architecture notes.
 
-- **Category:** On-chain counter for Base
-- **Status:** Public repository
-- **Live:** https://counter-base.vercel.app
-- **Repository:** https://github.com/yusufky63/base-counter
-- **Portfolio:** https://codexsha.dev
+## Features
 
-## Product Scope
+- Connect a wallet from web or Farcaster Mini App context.
+- Read and submit counter interactions on Base-oriented contracts.
+- Display leaderboard-style user activity.
+- Share activity through Farcaster-friendly surfaces.
+- Use `cloudflared` tunnel script for mobile/mini app testing.
 
-Base Counter is documented here as a product repository, not just a code dump. The goal of this README is to make the product purpose, runtime surface, and development path clear for future review and maintenance.
-
-## Core Capabilities
-
-- Base-only counter interaction
-- Wallet connection and network switching
-- Leaderboard presentation
-- Farcaster sharing flow
-- Mini app style distribution
-
-## Existing README Coverage Preserved
-
-This refresh keeps the important project-specific areas from the previous documentation:
-
-- Default Next.js starter README was present and did not describe the actual product
-
-## Tech Stack
-
-- Next.js
-- Farcaster SDK
-- Wagmi
-- Viem
-- Ethers
-- React Query
-- Ox
-
-## Repository Map
-
-| Path | Purpose |
+| Layer | Tools |
 | --- | --- |
-| src/app/ | Routes and main app |
-| src/components/ | Wallet and counter UI |
-| src/lib/ | Contract/Farcaster helpers |
-| public/ | Mini app assets |
+| App | Next.js, React, TypeScript, React Icons, Lucide React |
+| Farcaster | Farcaster Mini App SDK, Mini App Wagmi Connector |
+| Web3 | Wagmi, Viem, Ethers, Ox |
+| Data/UI | React Query, React Hot Toast, local app state |
 
-## Local Development
+## Project Structure
+
+- `src/` - App Router pages, components, wallet hooks, and contract interaction logic.
+- `public/` - icons and app metadata.
+- `apps.json` - mini app/discovery metadata.
+- `next.config.ts` - Next.js configuration.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
 
 | Command | Purpose |
 | --- | --- |
-| npm run dev | Run local dev server |
-| npm run build | Build production app |
-| npm run start | Start production server |
-| npm run lint | Run lint checks |
-| npm run tunnel | Run tunnel flow when testing mini app contexts |
+| `npm run dev` | Start the local Next.js dev server. |
+| `npm run build` | Build for production. |
+| `npm start` | Run the production server. |
+| `npm run lint` | Run lint checks. |
+| `npm run tunnel` | Expose local development through a tunnel for Farcaster/mobile testing. |
 
-## Environment Notes
+## Status
 
-Use local environment files for secrets and deployment-specific values. Do not commit real keys.
-
-- Contract address and ABI configuration
-- Wallet connector settings
-- Farcaster metadata values
-- Optional tunnel URL for mobile testing
-
-## Operational Notes
-
-- Keep this README aligned with the live product and portfolio copy.
-- Prefer small, documented changes over large undocumented rewrites.
-- This replaces the generic starter README with project-specific documentation.
-
-## Maintainer
-
-Built by Yusuf / Codexsha.
-
-- GitHub: https://github.com/yusufky63
-- X: https://x.com/codexsha
-- Telegram: https://t.me/codexsha
+- Repository: https://github.com/yusufky63/base-counter
+- Live app: https://counter-base.vercel.app
